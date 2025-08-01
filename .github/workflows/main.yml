@@ -1,0 +1,26 @@
+name: Web Scraping Diário
+
+on:
+  schedule:
+    - cron: '0 14 * * *'  # 15h em Portugal (UTC+1 no verão = 14h UTC)
+  workflow_dispatch:  # Permite execução manual também
+
+jobs:
+  run-scraper:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar o repositório
+        uses: actions/checkout@v3
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Instalar dependências
+        run: |
+          pip install -r requirements.txt
+
+      - name: Correr o script
+        run: |
+          python web_scrap_daily_prices_MNG.py
