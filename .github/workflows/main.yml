@@ -2,8 +2,8 @@ name: Web Scraping Diário
 
 on:
   schedule:
-    - cron: '0 15 * * *'  
-  workflow_dispatch:      # Permite correr manualmente também
+    - cron: '0 15 * * *'  # Todos os dias às 15h UTC (16h em Portugal no verão)
+  workflow_dispatch:       # Permite correr manualmente também
 
 jobs:
   run-scraper:
@@ -22,43 +22,42 @@ jobs:
       run: |
         pip install -r requirements.txt
 
-    - name: Install Google Chrome
+    - name: Instalar Google Chrome
       run: |
         wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
         sudo apt install -y ./google-chrome-stable_current_amd64.deb
 
-    - name: Get Chrome version
+    - name: Obter versão do Chrome
       id: chrome-version
       run: |
         CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
         echo "CHROME_VERSION=$CHROME_VERSION" >> $GITHUB_ENV
 
-    - name: Install matching ChromeDriver
+    - name: Instalar ChromeDriver compatível
       run: |
         CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json" \
           | jq -r --arg CHROME_VERSION "$CHROME_VERSION" '.versions[] | select(.version | startswith($CHROME_VERSION)) | .version' | head -n 1)
 
-        echo "Using ChromeDriver version: $CHROMEDRIVER_VERSION"
+        echo "ChromeDriver: $CHROMEDRIVER_VERSION"
 
         wget -q "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/$CHROMEDRIVER_VERSION/linux64/chromedriver-linux64.zip"
         unzip chromedriver-linux64.zip
         sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
         sudo chmod +x /usr/local/bin/chromedriver
 
-
-    - name: Correr script Python com Selenium
+    - name: Executar script Python com Selenium
       run: |
         export DISPLAY=:99
         Xvfb :99 -screen 0 1920x1080x24 &
         python web_scrap_daily_prices_MNG.py
 
-    - name: Commit e push do Excel gerado
+    - name: Commit e Push automático do Excel
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
-        git add output/spot_price_dailyHour_PT.xlsx
-        git commit -m "Atualização automática de preços de eletricidade"
-        git push
-      env:
-        GIT_AUTH_TOKEN: ${{ secrets.GH_PAT }}
-      continue-on-error: true  # Evita falhar se não houver alterações
+        git add output/spot_price_dailyHour_PT.xlsx || echo "Nada para adicionar"
+        git commit -m "Atualização automática de preços de eletricidade" || echo "Sem alterações para commit"
+        
+        # Atualiza URL remota com token integrado
+        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+        git push origin HEAD:${{ github.ref_name }}
