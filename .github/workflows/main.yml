@@ -55,7 +55,8 @@ jobs:
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
-        git add output/spot_price_dailyHour_PT.xlsx || echo "Nada para adicionar"
+        git add output/spot_price_dailyHour_PT.xlsx output/spot_price_dailyHour_PT.png || echo "Nada para adicionar"
+        git commit -m "Atualização automática de preços de eletricidade" || echo "Sem alterações para commit"
         git commit -m "Atualização automática de preços de eletricidade" || echo "Sem alterações para commit"
         
         # Atualiza URL remota com token integrado
