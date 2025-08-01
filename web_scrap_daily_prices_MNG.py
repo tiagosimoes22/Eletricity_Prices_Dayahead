@@ -146,7 +146,10 @@ hour_cols_sorted = sorted(hour_cols, key=lambda x: int(x.split('h')[0]))
 other_cols = [col for col in df_all_vf.columns if col not in hour_cols]
 df_all_vf = df_all_vf[hour_cols_sorted + other_cols]
 
-file_path = "C://Users//tmlopes//OneDrive - Sonae Arauco//Spot_Electricity_Project//spot_price_dailyHour_PT.xlsx"
+output_dir = "output"
+os.makedirs(output_dir, exist_ok=True)
+file_path = os.path.join(output_dir, "spot_price_dailyHour_PT.xlsx")
+
 # Save DataFrame to Excel
 df_all_vf.to_excel(file_path, index=True, sheet_name='Spot_PT')
 
