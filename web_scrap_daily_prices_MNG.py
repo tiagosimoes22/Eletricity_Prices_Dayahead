@@ -171,4 +171,62 @@ sheet.add_table(table)
 
 # Save workbook
 book.save(file_path)
-book.close()       
+book.close() 
+
+df_plot = df_all_vf.iloc[:,0:25]
+
+# Selecionar as colunas de horas e a coluna de preço médio diário
+hours = df_plot.columns[1:-1].tolist()  # type issue
+prices = df_plot.iloc[0, 1:-1].astype(float)  # Ensure prices are float
+daily_avg_price = df_plot['Price_Daily_Avg'].iloc[0]  # Seleciona o preço médio diário
+
+# Obter os valores máximos e mínimos
+ymax = prices.max()
+xmax = hours[np.argmax(prices)]
+ymin = prices.min()
+xmin = hours[np.argmin(prices)]
+
+# Configurar o gráfico
+fig = plt.figure(figsize=(10, 6))
+plt.gca().set_facecolor("#F5F4EF")
+fig.set_facecolor("#F5F4EF")
+
+# Plotar os preços por hora
+plt.plot(hours, prices, label='Price (€/mWh)', color='#556B2F', linewidth=3.2)
+plt.hlines(daily_avg_price, hours[0], hours[-1], colors='black', linestyles='dashed', label='Daily Avg Price')
+
+# Adicionar vlines para intervalos de horas com preço maior que a média diária
+above_avg = prices > daily_avg_price
+for i in range(1, len(hours)):
+    if above_avg[i] and not above_avg[i-1]:
+        plt.axvline(x=hours[i], color='grey', linestyle='dotted', alpha=0.6)
+    elif not above_avg[i] and above_avg[i-1]:
+        plt.axvline(x=hours[i-1], color='grey', linestyle='dotted', alpha=0.6)
+
+plt.xlabel('Hour')
+plt.ylabel('Price (€/mWh)')
+plt.title(f"Price Spot PT Energy for tomorrow - {df_plot.index[0]}", fontsize=18, y=1.05, fontname="Calibri")
+
+# Preencher a área entre os preços e o preço médio diário
+plt.fill_between(hours, prices, daily_avg_price, where=(prices > daily_avg_price), color='lightcoral', alpha=0.3)
+
+# Configurar os ticks do eixo x para mostrar todas as horas
+plt.gca().set_xticks(hours)
+plt.gca().set_xticklabels(hours, rotation=45)
+
+# Marcar os preços máximos e mínimos
+plt.plot(xmax, ymax, 'o', color='red', label='Max Price')
+plt.plot(xmin, ymin, 'o', color='green', label='Min Price')
+
+# Remover as bordas superior e direita do gráfico
+plt.gca().spines['top'].set_visible(False)
+plt.gca().spines['right'].set_visible(False)
+plt.legend()
+plt.tight_layout()
+#plt.show()
+
+output_dir = "output"
+os.makedirs(output_dir, exist_ok=True)
+fig.savefig(os.path.join(output_dir, "spot_price_dailyHour_PT.png"))
+
+
