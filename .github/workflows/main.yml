@@ -22,15 +22,27 @@ jobs:
       run: |
         pip install -r requirements.txt
 
-    - name: Instalar Google Chrome e Chromedriver
+    - name: Install Google Chrome
       run: |
-        sudo apt update
-        sudo apt install -y wget unzip xvfb libnss3 libxss1 libatk1.0-0 libgtk-3-0 libasound2 fonts-liberation
         wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-        sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt -f install -y
-        wget -O chromedriver.zip https://chromedriver.storage.googleapis.com/$(curl -s https://chromedriver.storage.googleapis.com/LATEST_RELEASE)/chromedriver_linux64.zip
-        unzip chromedriver.zip
-        sudo mv chromedriver /usr/local/bin/
+        sudo apt install -y ./google-chrome-stable_current_amd64.deb
+
+    - name: Get Chrome version
+      id: chrome-version
+      run: |
+        CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
+        echo "CHROME_VERSION=$CHROME_VERSION" >> $GITHUB_ENV
+
+    - name: Install matching ChromeDriver
+      run: |
+        CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json" \
+          | jq -r --arg CHROME_VERSION "$CHROME_VERSION" '.versions[] | select(.version | startswith($CHROME_VERSION)) | .version' | head -n 1)
+
+        echo "Using ChromeDriver version: $CHROMEDRIVER_VERSION"
+
+        wget -q "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/$CHROMEDRIVER_VERSION/linux64/chromedriver-linux64.zip"
+        unzip chromedriver-linux64.zip
+        sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
         sudo chmod +x /usr/local/bin/chromedriver
 
 
