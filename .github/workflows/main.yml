@@ -2,12 +2,12 @@ name: Web Scraping Diário
 
 on:
   schedule:
-    - cron: '0 14 * * *'  # Corre às 15h em Portugal no verão (14h UTC)
+    - cron: '0 15 * * *'  
   workflow_dispatch:      # Permite correr manualmente também
 
 jobs:
   run-scraper:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
     - name: Clonar repositório
