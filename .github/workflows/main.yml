@@ -2,7 +2,7 @@ name: Web Scraping Diário
 
 on:
   schedule:
-    - cron: '20 13 * * *'  # Todos os dias às 14h UTC (15h em Portugal no verão)
+    - cron: '15 13 * * *'  # Todos os dias às 14h UTC (15h em Portugal no verão)
   workflow_dispatch:       # Permite correr manualmente também
 
 jobs:
