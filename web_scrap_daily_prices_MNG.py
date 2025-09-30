@@ -41,7 +41,7 @@ df_all_vf = pd.DataFrame()  # Initialize an empty DataFrame to store all data
 
 # Iniciar o navegador
 driver = webdriver.Chrome()
-driver.get("https://www.omie.es/pt/market-results/daily/daily-market/day-ahead-price?scope=daily&date={current_date}".format(current_date=current_date))
+driver.get("https://www.omie.es/pt/market-results/daily/daily-market/day-ahead-price?scope=daily&period=60&date={current_date}".format(current_date=current_date))
 
 wait = WebDriverWait(driver, 10)
 
@@ -228,5 +228,6 @@ plt.tight_layout()
 output_dir = "output"
 os.makedirs(output_dir, exist_ok=True)
 fig.savefig(os.path.join(output_dir, "spot_price_dailyHour_PT.png"))
+
 
 
